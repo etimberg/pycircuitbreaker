@@ -2,11 +2,27 @@
 
 Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/bliki/CircuitBreaker.html). Inspired by [circuitbreaker](https://github.com/fabfuel/circuitbreaker) by Fabian Fuelling.
 
+## Installation
+
+```
+pip install pycircuitbreaker
+```
+
 ## Usage
+
+The simplest usage of `pycircuitbreaker` is to wrap decorate a function that can fail using `circuit`.
+
+```python
+from pycircuitbreaker import circuit
+
+@circuit
+def function_that_can_fail():
+    ...
+```
 
 ## Configuration
 
-A number of configuration options can be provided to the `CircuitBreaker` class or the `circuit` decorator. When using the decorator, options should be passed as keyword arguments
+A number of configuration options can be provided to the `CircuitBreaker` class or the `circuit` decorator to control the behaviour of the breaker. When using the decorator, options should be passed as keyword arguments.
 
 ### breaker_id
 
