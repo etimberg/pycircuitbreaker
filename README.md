@@ -1,6 +1,7 @@
 # PyCircuitBreaker
 
 ![CI Status](https://img.shields.io/github/workflow/status/etimberg/pycircuitbreaker/CI)
+![Coverage Status](https://coveralls.io/repos/github/etimberg/pycircuitbreaker/badge.svg?branch=master)(https://coveralls.io/github/etimberg/pycircuitbreaker?branch=master)
 
 Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/bliki/CircuitBreaker.html). Inspired by [circuitbreaker](https://github.com/fabfuel/circuitbreaker) by Fabian Fuelling.
 

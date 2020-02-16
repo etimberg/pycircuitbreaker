@@ -31,6 +31,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      - run: pip install -e .[test]
-      - run: pytest --cov-report term-missing --cov=pycircuitbreaker tests/
+      - run: |
+          pip install -e .[test]
+          pip install coveralls
+      - name: Run CI
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |
+          pytest --cov-report term-missing --cov=pycircuitbreaker tests/
+          coveralls
     
