@@ -62,6 +62,8 @@ def test_error_resets_reclose_state(half_open_breaker, error_func, success_func)
         half_open_breaker.call(error_func)
 
     assert half_open_breaker.state == CircuitBreakerState.OPEN
+    assert half_open_breaker.error_count == 2
+    assert half_open_breaker.success_count == 0
 
     sleep(1)
 
@@ -71,14 +73,30 @@ def test_error_resets_reclose_state(half_open_breaker, error_func, success_func)
     assert half_open_breaker.state == CircuitBreakerState.HALF_OPEN
 
 
-def test_half_open_breaker_fully_opens_after_recovery_threshold(
+def test_half_open_breaker_closes_after_recovery_threshold(
     half_open_breaker, success_func
 ):
     half_open_breaker.call(success_func)
     assert half_open_breaker.state == CircuitBreakerState.HALF_OPEN
+    assert half_open_breaker.success_count == 1
 
     half_open_breaker.call(success_func)
     assert half_open_breaker.state == CircuitBreakerState.CLOSED
+    assert half_open_breaker.success_count == 2
+
+
+def test_error_during_recovery_period_resets_recovery_count(
+    half_open_breaker, error_func, success_func
+):
+    half_open_breaker.call(success_func)
+    assert half_open_breaker.state == CircuitBreakerState.HALF_OPEN
+    assert half_open_breaker.success_count == 1
+
+    with pytest.raises(IOError):
+        half_open_breaker.call(error_func)
+
+    assert half_open_breaker.state == CircuitBreakerState.OPEN
+    assert half_open_breaker.success_count == 0
 
 
 def test_exception_whitelist(error_func):

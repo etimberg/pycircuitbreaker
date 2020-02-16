@@ -144,6 +144,14 @@ class CircuitBreaker:
         return self._id
 
     @property
+    def recovery_start_time(self) -> datetime:
+        """
+        The UTC time until which the breaker is fully open. After this time,
+        the recovery period will begin and test requests will be allowed through
+        """
+        return self._time_opened + timedelta(seconds=self._recovery_timeout)
+
+    @property
     def state(self) -> CircuitBreakerState:
         """
         The state of the breaker.
@@ -158,12 +166,8 @@ class CircuitBreaker:
         return self._state
 
     @property
-    def recovery_start_time(self) -> datetime:
-        """
-        The UTC time until which the breaker is fully open. After this time,
-        the recovery period will begin and test requests will be allowed through
-        """
-        return self._time_opened + timedelta(seconds=self._recovery_timeout)
+    def success_count(self) -> int:
+        return self._success_count
 
 
 def circuit(func: Callable, **kwargs) -> Callable:
