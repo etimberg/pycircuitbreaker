@@ -12,12 +12,12 @@ class CircuitBreakerException(Exception):
 
     def __str__(self):
         seconds_remaining = (
-            self.breaker.recovery_start_time - datetime.utcnow()
+            self._breaker.recovery_start_time - datetime.utcnow()
         ).total_seconds()
         return (
-            f"Circuit {self.breaker.id} OPEN "
-            f"until {self.breaker.recovery_start_time.isoformat()} "
-            f"({self.breaker.error_count} errors, {seconds_remaining} sec remaining)"
+            f"Circuit {self._breaker.id} OPEN "
+            f"until {self._breaker.recovery_start_time.isoformat()} "
+            f"({self._breaker.error_count} errors, {seconds_remaining} sec remaining)"
         )
 
 

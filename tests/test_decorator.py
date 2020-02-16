@@ -18,7 +18,7 @@ def test_decorator_error(error_func):
 
     with pytest.raises(IOError):
         wrapped()
-    
+
     with pytest.raises(CircuitBreakerException):
         wrapped()
 
@@ -28,4 +28,4 @@ def test_decorator_passes_args_to_wrapped_function():
         return arg
 
     wrapped = circuit(func)
-    assert wrapped('foo') == 'foo'
+    assert wrapped("foo") == "foo"
