@@ -11,22 +11,6 @@ from pycircuitbreaker import (
 
 
 @pytest.fixture()
-def error_func():
-    def raises_error():
-        raise IOError
-
-    return raises_error
-
-
-@pytest.fixture()
-def success_func():
-    def success():
-        pass
-
-    return success
-
-
-@pytest.fixture()
 def half_open_breaker(error_func):
     breaker = CircuitBreaker(
         error_threshold=1, recovery_timeout=1, recovery_threshold=2
