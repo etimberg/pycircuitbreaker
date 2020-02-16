@@ -5,6 +5,22 @@ from typing import Callable, Iterable, Optional
 from uuid import uuid4
 
 
+class CircuitBreakerException(Exception):
+    def __init__(self, breaker, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._breaker = breaker
+
+    def __str__(self):
+        seconds_remaining = (
+            self.breaker.recovery_start_time - datetime.utcnow()
+        ).total_seconds()
+        return (
+            f"Circuit {self.breaker.id} OPEN "
+            f"until {self.breaker.recovery_start_time.isoformat()} "
+            f"({self.breaker.error_count} errors, {seconds_remaining} sec remaining)"
+        )
+
+
 class CircuitBreakerState(Enum):
     CLOSED = "CLOSED"
     HALF_OPEN = "HALF_OPEN"
@@ -57,8 +73,7 @@ class CircuitBreaker:
         Call the supplied function respecting the circuit breaker rule
         """
         if self.state == CircuitBreakerState.OPEN:
-            # TODO: replace this with a configurable error
-            raise Exception("CIRCUIT BREAKER IS OPEN")
+            raise CircuitBreakerException(self)
 
         result = None
 
@@ -119,6 +134,14 @@ class CircuitBreaker:
 
             if self._on_close:
                 self._on_close(self)
+
+    @property
+    def error_count(self):
+        return self._error_count
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def state(self) -> CircuitBreakerState:

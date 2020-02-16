@@ -3,7 +3,11 @@ from unittest import mock
 
 import pytest
 
-from pycircuitbreaker import CircuitBreaker, CircuitBreakerState
+from pycircuitbreaker import (
+    CircuitBreaker,
+    CircuitBreakerException,
+    CircuitBreakerState,
+)
 
 
 @pytest.fixture()
@@ -179,3 +183,15 @@ def test_notifies_on_breaker_close(error_func, success_func):
     breaker.call(success_func)
 
     assert mock_close.call_count == 1
+
+
+def test_calling_an_open_breaker_raises_an_error(error_func):
+    breaker = CircuitBreaker(
+        error_threshold=1, recovery_timeout=1, recovery_threshold=2
+    )
+
+    with pytest.raises(IOError):
+        breaker.call(error_func)
+
+    with pytest.raises(CircuitBreakerException):
+        breaker.call(error_func)
