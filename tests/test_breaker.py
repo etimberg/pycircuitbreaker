@@ -138,7 +138,7 @@ def test_can_detect_errors_that_are_not_exceptions(error_val, expected_state):
     assert breaker.state is expected_state
 
 
-def test_notifies_on_breaker_open(error_func):
+def test_notifies_on_breaker_open(error_func, io_error):
     mock_open = mock.Mock()
     breaker = CircuitBreaker(error_threshold=1, on_open=mock_open)
 
@@ -147,7 +147,8 @@ def test_notifies_on_breaker_open(error_func):
     with pytest.raises(IOError):
         breaker.call(error_func)
 
-    assert mock_open.call_count == 1
+    mock_open.assert_called_once()
+    mock_open.assert_called_with(breaker, io_error)
 
 
 def test_notifies_on_breaker_close(error_func, success_func):

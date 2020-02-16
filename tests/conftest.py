@@ -2,9 +2,14 @@ import pytest
 
 
 @pytest.fixture()
-def error_func():
+def io_error():
+    return IOError()
+
+
+@pytest.fixture()
+def error_func(io_error):
     def raises_error():
-        raise IOError
+        raise io_error
 
     return raises_error
 

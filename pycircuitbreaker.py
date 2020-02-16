@@ -81,11 +81,11 @@ class CircuitBreaker:
             result = func(*args, *kwargs)
         except Exception as ex:
             if not self._exception_whitelisted(ex) and self._exception_blacklisted(ex):
-                self._handle_error()
+                self._handle_error(ex)
                 raise
 
         if self._detect_error is not None and self._detect_error(result):
-            self._handle_error()
+            self._handle_error(result)
         else:
             self._handle_success()
 
@@ -114,7 +114,7 @@ class CircuitBreaker:
 
         return exception_in_list(exception, self._exception_whitelist)
 
-    def _handle_error(self):
+    def _handle_error(self, error):
         self._error_count += 1
 
         if self._error_count >= self._error_threshold:
@@ -123,7 +123,7 @@ class CircuitBreaker:
             self._time_opened = datetime.utcnow()
 
             if self._on_open:
-                self._on_open(self)
+                self._on_open(self, error)
 
     def _handle_success(self):
         self._success_count += 1
