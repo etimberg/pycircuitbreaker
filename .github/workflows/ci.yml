@@ -33,4 +33,16 @@ jobs:
           architecture: x64
       - run: pip install -e .[test]
       - run: pytest --cov-report term-missing --cov=pycircuitbreaker tests/
+
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel: true
+
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
     
