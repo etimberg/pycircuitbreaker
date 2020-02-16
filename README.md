@@ -6,18 +6,18 @@ Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/
 
 ## To Do
 
-- [ ] Breaker decorator
+- [x] Breaker decorator
 - [ ] Notifications
 - [ ] Return filtering for errors with customer function
-- [ ] Configurable timeout
-- [ ] Configurable failure rate
-- [ ] Configurable success count before reclose
+- [x] Configurable timeout
+- [x] Configurable failure rate
+- [x] Configurable success count before reclose
 - [ ] Configurable error on raise
 - [ ] Default exception when breaker is open
 - [ ] Exception whitelist & blacklist
 - [ ] Function based exception filtering
 - [ ] GitHub Actions
-- [ ] Black formatting
+- [x] Black formatting
 - [ ] Tests
 - [ ] Release process
 - [ ] Examples
