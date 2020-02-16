@@ -3,7 +3,7 @@ import os.path
 from setuptools import setup
 
 thisdir = os.path.abspath(os.path.dirname(__file__))
-version = open(os.path.join(thisdir, "VERSION")).read().strip()
+version = open(os.path.join(thisdir, "pycircuitbreaker", "VERSION")).read().strip()
 
 
 def readme():
@@ -30,9 +30,9 @@ setup(
     license="MIT",
     long_description=readme(),
     long_description_content_type="text/markdown",
+    packages=["pycircuitbreaker"],
     package_data={"": ["VERSION"]},
     platforms="any",
-    py_modules=["pycircuitbreaker"],
     url="https://github.com/etimberg/pycircuitbreaker",
     version=version,
     zip_safe=False,
