@@ -16,9 +16,10 @@ Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/
 - [x] Exception whitelist & blacklist
 - [ ] GitHub Actions
 - [x] Black formatting
-- [ ] Tests
-- [ ] Test exception to string
+- [x] Tests
+- [x] Test exception to string
 - [x] Test decorator e2e
 - [ ] Release process
 - [ ] Examples
 - [ ] Document config options
+- [ ] Document CircuitBreaker public API

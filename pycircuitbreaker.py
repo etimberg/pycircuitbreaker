@@ -142,6 +142,13 @@ class CircuitBreaker:
     @property
     def id(self):
         return self._id
+    
+    @property
+    def open_time(self): datetime:
+        """
+        The UTC time when the breaker opened
+        """
+        return self._time_opened
 
     @property
     def recovery_start_time(self) -> datetime:
