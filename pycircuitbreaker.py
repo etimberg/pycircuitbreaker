@@ -26,6 +26,7 @@ class CircuitBreaker:
         self._id = breaker_id or uuid4()
         self._error_count = 0
         self._error_threshold = error_threshold
+        self._recovery_threshold = recovery_threshold
         self._recovery_timeout = recovery_timeout
         self._state = CircuitBreakerState.CLOSED
         self._success_count = 0
@@ -44,6 +45,8 @@ class CircuitBreaker:
         except Exception:
             self._handle_error()
             raise
+
+        self._handle_success()
 
     def _handle_error(self):
         self._error_count += 1
