@@ -3,11 +3,13 @@ import os.path
 from setuptools import setup
 
 thisdir = os.path.abspath(os.path.dirname(__file__))
-version = open(os.path.join(thisdir, 'VERSION')).read().strip()
+version = open(os.path.join(thisdir, "VERSION")).read().strip()
+
 
 def readme():
-    with open("README.md", 'r', encoding="UTF-8") as f:
+    with open("README.md", "r", encoding="UTF-8") as f:
         return f.read()
+
 
 setup(
     name="pycircuitbreaker",
@@ -24,18 +26,11 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     description="Python implementation of the Circuit Breaker Pattern",
-    extras_require={
-        "test": [
-            "pytest>=5.3",
-            "pytest-cov",
-        ]
-    },
+    extras_require={"test": ["pytest>=5.3", "pytest-cov",]},
     license="MIT",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    package_data={
-        '': ['VERSION']
-    },
+    package_data={"": ["VERSION"]},
     platforms="any",
     py_modules=["pycircuitbreaker"],
     url="https://github.com/etimberg/pycircuitbreaker",

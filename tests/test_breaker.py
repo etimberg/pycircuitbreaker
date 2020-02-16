@@ -9,6 +9,7 @@ from pycircuitbreaker import CircuitBreaker, CircuitBreakerState
 def error_func():
     def raises_error():
         raise IOError
+
     return raises_error
 
 
