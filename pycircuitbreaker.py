@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from enum import Enum
-from functools import wraps
-from typing import Callable, Optional
+from functools import lru_cache, wraps
+from typing import Callable, Iterable, Optional
 from uuid import uuid4
 
 
@@ -9,6 +9,16 @@ class CircuitBreakerState(Enum):
     CLOSED = "CLOSED"
     HALF_OPEN = "HALF_OPEN"
     OPEN = "OPEN"
+
+
+@lru_cache()
+def exception_in_list(exception: Exception, type_list: Iterable[Exception]):
+    """
+    Check if the exception matches any type in the list considering derived types
+
+    This was extracted from the CircuitBreaker class to enable use of the lru_cache
+    """
+    return any(isinstance(exception, exc_type) for exc_type in type_list)
 
 
 class CircuitBreaker:
@@ -19,6 +29,8 @@ class CircuitBreaker:
     def __init__(
         self,
         breaker_id: Optional = None,
+        exception_blacklist: Optional[Iterable[Exception]] = None,
+        exception_whitelist: Optional[Iterable[Exception]] = None,
         error_threshold: int = ERROR_THRESHOLD,
         recovery_threshold: int = RECOVERY_THRESHOLD,
         recovery_timeout: int = RECOVERY_TIMEOUT,
@@ -26,6 +38,8 @@ class CircuitBreaker:
         self._id = breaker_id or uuid4()
         self._error_count = 0
         self._error_threshold = error_threshold
+        self._exception_blacklist = frozenset(exception_blacklist or [])
+        self._exception_whitelist = frozenset(exception_whitelist or [])
         self._recovery_threshold = recovery_threshold
         self._recovery_timeout = recovery_timeout
         self._state = CircuitBreakerState.CLOSED
@@ -42,11 +56,35 @@ class CircuitBreaker:
 
         try:
             func(*args, *kwargs)
-        except Exception:
-            self._handle_error()
-            raise
+        except Exception as ex:
+            if not self._exception_whitelisted(ex) and self._exception_blacklisted(ex):
+                self._handle_error()
+                raise
 
         self._handle_success()
+
+    def _exception_blacklisted(self, exception):
+        """
+        Determine if an exception type is blacklisted by checking to see
+        if it matches any type in the blacklist
+        """
+        if (
+            not self._exception_blacklist
+            or type(exception) in self._exception_blacklist
+        ):
+            return True
+
+        return exception_in_list(exception, self._exception_blacklist)
+
+    def _exception_whitelisted(self, exception):
+        """
+        Determine if an exception type is whitelisted by checking to see
+        if it matches any type in the whitelist
+        """
+        if type(exception) in self._exception_whitelist:
+            return True
+
+        return exception_in_list(exception, self._exception_whitelist)
 
     def _handle_error(self):
         self._error_count += 1
