@@ -14,7 +14,7 @@ Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/
 - [x] Configurable success count before reclose
 - [ ] Configurable error on raise
 - [ ] Default exception when breaker is open
-- [ ] Exception whitelist & blacklist
+- [x] Exception whitelist & blacklist
 - [ ] Function based exception filtering
 - [ ] GitHub Actions
 - [x] Black formatting
