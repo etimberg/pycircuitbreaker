@@ -34,7 +34,10 @@ jobs:
       - run: |
           pip install -e .[test]
           pip install coveralls
-      - run: |
+      - name: Run CI
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |
           pytest --cov-report term-missing --cov=pycircuitbreaker tests/
           coveralls
     
