@@ -64,6 +64,22 @@ def test_breaker_recloses_after_recovery_time(error_func):
     sleep(1)
     assert breaker.state == CircuitBreakerState.HALF_OPEN
 
+def test_error_resets_reclose_state(half_open_breaker, error_func, success_func):
+    half_open_breaker.call(success_func)
+    assert half_open_breaker.state == CircuitBreakerState.HALF_OPEN
+
+    with pytest.raises(IOError):
+        half_open_breaker.call(error_func)
+    
+    assert half_open_breaker.state == CircuitBreakerState.OPEN
+
+    sleep(1)
+
+    # If the count of success functions was correctly reset on error,
+    # we should expect to be back at half open as there is only 1 success at this point
+    half_open_breaker.call(success_func)
+    assert half_open_breaker.state == CircuitBreakerState.HALF_OPEN
+
 
 def test_half_open_breaker_fully_opens_after_recovery_threshold(
     half_open_breaker, success_func
