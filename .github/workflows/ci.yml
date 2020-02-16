@@ -31,19 +31,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      - run: pip install -e .[test]
-      - run: pytest --cov-report term-missing --cov=pycircuitbreaker tests/
-
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel: true
-          path-to-lcov: ./coverage
-
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
+      - run: |
+          pip install -e .[test]
+          pip install coveralls
+      - run: |
+          pytest --cov-report term-missing --cov=pycircuitbreaker tests/
+          coveralls
     
