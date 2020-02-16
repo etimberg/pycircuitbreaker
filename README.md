@@ -17,6 +17,8 @@ Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/
 - [ ] GitHub Actions
 - [x] Black formatting
 - [ ] Tests
+- [ ] Test exception to string
+- [ ] Test decorator e2e
 - [ ] Release process
 - [ ] Examples
 - [ ] Document config options
