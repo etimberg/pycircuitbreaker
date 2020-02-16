@@ -46,9 +46,9 @@ class CircuitBreaker:
         self,
         breaker_id: Optional = None,
         detect_error: Optional[Callable] = None,
+        error_threshold: int = ERROR_THRESHOLD,
         exception_blacklist: Optional[Iterable[Exception]] = None,
         exception_whitelist: Optional[Iterable[Exception]] = None,
-        error_threshold: int = ERROR_THRESHOLD,
         on_close: Optional[Callable] = None,
         on_open: Optional[Callable] = None,
         recovery_threshold: int = RECOVERY_THRESHOLD,
@@ -136,7 +136,7 @@ class CircuitBreaker:
                 self._on_close(self)
 
     @property
-    def error_count(self):
+    def error_count(self) -> int:
         return self._error_count
 
     @property
