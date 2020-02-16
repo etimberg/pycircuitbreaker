@@ -29,6 +29,7 @@ class CircuitBreaker:
     def __init__(
         self,
         breaker_id: Optional = None,
+        detect_error: Optional[Callable] = None,
         exception_blacklist: Optional[Iterable[Exception]] = None,
         exception_whitelist: Optional[Iterable[Exception]] = None,
         error_threshold: int = ERROR_THRESHOLD,
@@ -36,6 +37,7 @@ class CircuitBreaker:
         recovery_timeout: int = RECOVERY_TIMEOUT,
     ):
         self._id = breaker_id or uuid4()
+        self._detect_error = detect_error
         self._error_count = 0
         self._error_threshold = error_threshold
         self._exception_blacklist = frozenset(exception_blacklist or [])
@@ -53,15 +55,22 @@ class CircuitBreaker:
         if self.state == CircuitBreakerState.OPEN:
             # TODO: replace this with a configurable error
             raise Exception("CIRCUIT BREAKER IS OPEN")
+        
+        result = None
 
         try:
-            func(*args, *kwargs)
+            result = func(*args, *kwargs)
         except Exception as ex:
             if not self._exception_whitelisted(ex) and self._exception_blacklisted(ex):
                 self._handle_error()
                 raise
 
-        self._handle_success()
+        if self._detect_error is not None and self._detect_error(result):
+            self._handle_error()
+        else:
+            self._handle_success()
+        
+        return result
 
     def _exception_blacklisted(self, exception):
         """

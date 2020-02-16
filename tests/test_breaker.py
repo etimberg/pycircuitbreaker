@@ -129,3 +129,21 @@ def test_exception_blacklist_supports_inheritance(error_func):
         breaker.call(error_func)
 
     assert breaker.state == CircuitBreakerState.OPEN
+
+
+@pytest.mark.parametrize('error_val, expected_state', [
+    (False, CircuitBreakerState.OPEN),
+    (True, CircuitBreakerState.CLOSED),
+])
+def test_can_detect_errors_that_are_not_exceptions(error_val, expected_state):
+    breaker = CircuitBreaker(
+        detect_error=lambda ret_val: ret_val is False,
+        error_threshold=1,
+    )
+
+    def return_code_error():
+        return error_val
+    
+    result = breaker.call(return_code_error)
+    assert result is error_val
+    assert breaker.state is expected_state
