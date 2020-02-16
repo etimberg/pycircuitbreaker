@@ -33,6 +33,8 @@ class CircuitBreaker:
         exception_blacklist: Optional[Iterable[Exception]] = None,
         exception_whitelist: Optional[Iterable[Exception]] = None,
         error_threshold: int = ERROR_THRESHOLD,
+        on_close: Optional[Callable] = None,
+        on_open: Optional[Callable] = None,
         recovery_threshold: int = RECOVERY_THRESHOLD,
         recovery_timeout: int = RECOVERY_TIMEOUT,
     ):
@@ -42,6 +44,8 @@ class CircuitBreaker:
         self._error_threshold = error_threshold
         self._exception_blacklist = frozenset(exception_blacklist or [])
         self._exception_whitelist = frozenset(exception_whitelist or [])
+        self._on_close = on_close
+        self._on_open = on_open
         self._recovery_threshold = recovery_threshold
         self._recovery_timeout = recovery_timeout
         self._state = CircuitBreakerState.CLOSED
@@ -55,7 +59,7 @@ class CircuitBreaker:
         if self.state == CircuitBreakerState.OPEN:
             # TODO: replace this with a configurable error
             raise Exception("CIRCUIT BREAKER IS OPEN")
-        
+
         result = None
 
         try:
@@ -69,7 +73,7 @@ class CircuitBreaker:
             self._handle_error()
         else:
             self._handle_success()
-        
+
         return result
 
     def _exception_blacklisted(self, exception):
@@ -103,12 +107,18 @@ class CircuitBreaker:
             self._success_count = 0
             self._time_opened = datetime.utcnow()
 
+            if self._on_open:
+                self._on_open(self)
+
     def _handle_success(self):
         self._success_count += 1
 
         if self._success_count >= self._recovery_threshold:
             self._state = CircuitBreakerState.CLOSED
             self._error_count = 0
+
+            if self._on_close:
+                self._on_close(self)
 
     @property
     def state(self) -> CircuitBreakerState:

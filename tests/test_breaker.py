@@ -1,4 +1,5 @@
 from time import sleep
+from unittest import mock
 
 import pytest
 
@@ -64,13 +65,14 @@ def test_breaker_recloses_after_recovery_time(error_func):
     sleep(1)
     assert breaker.state == CircuitBreakerState.HALF_OPEN
 
+
 def test_error_resets_reclose_state(half_open_breaker, error_func, success_func):
     half_open_breaker.call(success_func)
     assert half_open_breaker.state == CircuitBreakerState.HALF_OPEN
 
     with pytest.raises(IOError):
         half_open_breaker.call(error_func)
-    
+
     assert half_open_breaker.state == CircuitBreakerState.OPEN
 
     sleep(1)
@@ -131,19 +133,49 @@ def test_exception_blacklist_supports_inheritance(error_func):
     assert breaker.state == CircuitBreakerState.OPEN
 
 
-@pytest.mark.parametrize('error_val, expected_state', [
-    (False, CircuitBreakerState.OPEN),
-    (True, CircuitBreakerState.CLOSED),
-])
+@pytest.mark.parametrize(
+    "error_val, expected_state",
+    [(False, CircuitBreakerState.OPEN), (True, CircuitBreakerState.CLOSED),],
+)
 def test_can_detect_errors_that_are_not_exceptions(error_val, expected_state):
     breaker = CircuitBreaker(
-        detect_error=lambda ret_val: ret_val is False,
-        error_threshold=1,
+        detect_error=lambda ret_val: ret_val is False, error_threshold=1,
     )
 
     def return_code_error():
         return error_val
-    
+
     result = breaker.call(return_code_error)
     assert result is error_val
     assert breaker.state is expected_state
+
+
+def test_notifies_on_breaker_open(error_func):
+    mock_open = mock.Mock()
+    breaker = CircuitBreaker(error_threshold=1, on_open=mock_open)
+
+    assert mock_open.call_count == 0
+
+    with pytest.raises(IOError):
+        breaker.call(error_func)
+
+    assert mock_open.call_count == 1
+
+
+def test_notifies_on_breaker_close(error_func, success_func):
+    mock_close = mock.Mock()
+    breaker = CircuitBreaker(
+        error_threshold=1, on_close=mock_close, recovery_timeout=1,
+    )
+
+    assert mock_close.call_count == 0
+
+    with pytest.raises(IOError):
+        breaker.call(error_func)
+
+    assert mock_close.call_count == 0
+
+    sleep(1)
+    breaker.call(success_func)
+
+    assert mock_close.call_count == 1
