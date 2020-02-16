@@ -18,7 +18,7 @@ class CircuitBreaker():
 
     def __init__(
         self,
-        breaker_id: Optional,
+        breaker_id: Optional = None,
         error_threshold: int = ERROR_THRESHOLD,
         recovery_threshold: int = RECOVERY_THRESHOLD,
         recovery_timeout: int = RECOVERY_TIMEOUT,
