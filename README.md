@@ -21,4 +21,4 @@ Python Implementation of the [Circuit Breaker Pattern](https://martinfowler.com/
 - [ ] Tests
 - [ ] Release process
 - [ ] Examples
-- [ ] Document options
+- [ ] Document config options
