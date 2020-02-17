@@ -72,3 +72,10 @@ def test_net_error_strategy_half_open_to_open(error_func, success_func):
         breaker.call(error_func)
 
     assert breaker.state == CircuitBreakerState.OPEN
+
+
+def test_net_error_strategy_count_never_negative(success_func):
+    breaker = CircuitBreaker(strategy=CircuitBreakerStrategy.NET_ERROR,)
+    breaker.call(success_func)
+
+    assert breaker._strategy._net_error_count == 0
