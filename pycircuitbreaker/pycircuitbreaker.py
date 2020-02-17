@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from .exceptions import CircuitBreakerException
 from .state import CircuitBreakerState
-from .strategies import SingleResetStrategy
+from .strategies import CircuitBreakerStrategy, get_strategy
 
 
 @lru_cache()
@@ -34,6 +34,7 @@ class CircuitBreaker:
         on_open: Optional[Callable] = None,
         recovery_threshold: int = RECOVERY_THRESHOLD,
         recovery_timeout: int = RECOVERY_TIMEOUT,
+        strategy: CircuitBreakerStrategy = CircuitBreakerStrategy.SINGLE_RESET,
     ):
         self._id = breaker_id or uuid4()
         self._detect_error = detect_error
@@ -42,10 +43,12 @@ class CircuitBreaker:
         self._on_close = on_close
         self._on_open = on_open
         self._recovery_timeout = recovery_timeout
-        self._strategy = SingleResetStrategy(
+        self._time_opened = datetime.utcnow()
+
+        Strategy = get_strategy(strategy)
+        self._strategy = Strategy(
             error_threshold=error_threshold, recovery_threshold=recovery_threshold
         )
-        self._time_opened = datetime.utcnow()
 
     def call(self, func, *args, **kwargs):
         """
