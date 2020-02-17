@@ -1,16 +1,11 @@
 from datetime import datetime, timedelta
-from enum import Enum
 from functools import lru_cache, wraps
 from typing import Callable, Iterable, Optional
 from uuid import uuid4
 
 from .exceptions import CircuitBreakerException
-
-
-class CircuitBreakerState(Enum):
-    CLOSED = "CLOSED"
-    HALF_OPEN = "HALF_OPEN"
-    OPEN = "OPEN"
+from .state import CircuitBreakerState
+from .strategies import SingleResetStrategy
 
 
 @lru_cache()
@@ -42,16 +37,14 @@ class CircuitBreaker:
     ):
         self._id = breaker_id or uuid4()
         self._detect_error = detect_error
-        self._error_count = 0
-        self._error_threshold = error_threshold
         self._exception_blacklist = frozenset(exception_blacklist or [])
         self._exception_whitelist = frozenset(exception_whitelist or [])
         self._on_close = on_close
         self._on_open = on_open
-        self._recovery_threshold = recovery_threshold
         self._recovery_timeout = recovery_timeout
-        self._state = CircuitBreakerState.CLOSED
-        self._success_count = 0
+        self._strategy = SingleResetStrategy(
+            error_threshold=error_threshold, recovery_threshold=recovery_threshold
+        )
         self._time_opened = datetime.utcnow()
 
     def call(self, func, *args, **kwargs):
@@ -101,29 +94,29 @@ class CircuitBreaker:
         return exception_in_list(exception, self._exception_whitelist)
 
     def _handle_error(self, error):
-        self._error_count += 1
+        opened = self._strategy.handle_error()
 
-        if self._error_count >= self._error_threshold:
-            self._state = CircuitBreakerState.OPEN
-            self._success_count = 0
+        if opened:
             self._time_opened = datetime.utcnow()
 
             if self._on_open:
                 self._on_open(self, error)
 
     def _handle_success(self):
-        self._success_count += 1
+        previous_state = self._strategy.state
+        self._strategy.handle_success()
+        current_state = self._strategy.state
 
-        if self._success_count >= self._recovery_threshold:
-            self._state = CircuitBreakerState.CLOSED
-            self._error_count = 0
-
+        if (
+            previous_state != CircuitBreakerState.CLOSED
+            and current_state == CircuitBreakerState.CLOSED
+        ):
             if self._on_close:
                 self._on_close(self)
 
     @property
     def error_count(self) -> int:
-        return self._error_count
+        return self._strategy.error_count
 
     @property
     def id(self):
@@ -152,15 +145,16 @@ class CircuitBreaker:
         has elapsed, the breaker is moved to the half_open state
         """
         if (
-            self._state == CircuitBreakerState.OPEN
+            self._strategy.state == CircuitBreakerState.OPEN
             and datetime.utcnow() >= self.recovery_start_time
         ):
             return CircuitBreakerState.HALF_OPEN
-        return self._state
+
+        return self._strategy.state
 
     @property
     def success_count(self) -> int:
-        return self._success_count
+        return self._strategy.success_count
 
 
 def circuit(func: Callable, **kwargs) -> Callable:

@@ -1,6 +1,3 @@
-from .pycircuitbreaker import (
-    circuit,
-    CircuitBreaker,
-    CircuitBreakerState,
-)
+from .pycircuitbreaker import circuit, CircuitBreaker
 from .exceptions import CircuitBreakerException
+from .state import CircuitBreakerState
