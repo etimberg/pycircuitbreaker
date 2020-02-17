@@ -177,5 +177,4 @@ The number of successes stored in the breaker during the recovery period.
 
 ## Roadmap
 
-1. Mode to prevent a single success from resetting the error count. By default, if a service errors 4 times in a row, then succeeds, then errors 4 times in a row, it will never open the breaker
-2. Back circuit breaker state with Redis to share state among processes (e.g. for gunicorn)
+1. Back circuit breaker state with Redis to share state among processes (e.g. for gunicorn)
