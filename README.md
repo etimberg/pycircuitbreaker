@@ -26,6 +26,10 @@ def function_that_can_fail():
     ...
 ```
 
+### Reset Strategies
+
+By default, pycircuitbreaker operates such that a single success resets the error state of a closed breaker. This makes sense for a service that rarely fails, but in certains cases this can pose a problem. If the `error_threshold` is set to `5`, but only 4/5 external requests fail, the breaker will never open. To get around this, the [strategy setting])(#strategy) may be used. By setting this to `pycircuitbreaker.CircuitBreakerStrategy.NET_ERROR`, the net error count (errors - successes) will be used to trigger the breaker.
+
 ## Configuration
 
 A number of configuration options can be provided to the `CircuitBreaker` class or the `circuit` decorator to control the behaviour of the breaker. When using the decorator, options should be passed as keyword arguments.
@@ -122,6 +126,17 @@ Default: 30
 
 The number of seconds the breaker stays fully open for before test requests are allowed through.
 
+### strategy
+
+Type: `Optional[pycircuitbreaker.CircuitBreakerStrategy]`
+Default: `pycircuitbreaker.CircuitBreakerStrategy.SINGLE_RESET`
+
+Controls how successes change the error count when the breaker is closed. By default, a single success resets the number of errors in the breaker.
+
+Possible options:
+* `CircuitBreakerStrategy.SINGLE_RESET`
+* `CircuitBreakerStrategy.NET_ERROR`
+
 ## CircuitBreaker API
 
 The public API of the `CircuitBreaker` class is described below.
@@ -162,5 +177,4 @@ The number of successes stored in the breaker during the recovery period.
 
 ## Roadmap
 
-1. Mode to prevent a single success from resetting the error count. By default, if a service errors 4 times in a row, then succeeds, then errors 4 times in a row, it will never open the breaker
-2. Back circuit breaker state with Redis to share state among processes (e.g. for gunicorn)
+1. Back circuit breaker state with Redis to share state among processes (e.g. for gunicorn)
