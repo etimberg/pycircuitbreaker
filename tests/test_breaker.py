@@ -198,3 +198,8 @@ def test_calling_an_open_breaker_raises_an_error(error_func):
 
     with pytest.raises(CircuitBreakerException):
         breaker.call(error_func)
+
+
+def test_unknown_strategy_causes_error():
+    with pytest.raises(ValueError):
+        CircuitBreaker(strategy="foo")
