@@ -1,6 +1,6 @@
 import os
 import os.path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 thisdir = os.path.abspath(os.path.dirname(__file__))
 version = open(os.path.join(thisdir, "pycircuitbreaker", "VERSION")).read().strip()
@@ -30,7 +30,7 @@ setup(
     license="MIT",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    packages=["pycircuitbreaker"],
+    packages=find_packages(exclude=["tests", "tests.*"]),
     package_data={"": ["VERSION"]},
     platforms="any",
     url="https://github.com/etimberg/pycircuitbreaker",
