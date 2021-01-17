@@ -8,7 +8,8 @@ from pycircuitbreaker.strategies import CircuitBreakerStrategy
 
 def test_net_error_strategy(error_func, success_func):
     breaker = CircuitBreaker(
-        strategy=CircuitBreakerStrategy.NET_ERROR, error_threshold=3,
+        strategy=CircuitBreakerStrategy.NET_ERROR,
+        error_threshold=3,
     )
 
     with pytest.raises(IOError):
@@ -75,7 +76,9 @@ def test_net_error_strategy_half_open_to_open(error_func, success_func):
 
 
 def test_net_error_strategy_count_never_negative(success_func):
-    breaker = CircuitBreaker(strategy=CircuitBreakerStrategy.NET_ERROR,)
+    breaker = CircuitBreaker(
+        strategy=CircuitBreakerStrategy.NET_ERROR,
+    )
     breaker.call(success_func)
 
     assert breaker._strategy._net_error_count == 0

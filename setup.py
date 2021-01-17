@@ -26,7 +26,12 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     description="Python implementation of the Circuit Breaker Pattern",
-    extras_require={"test": ["pytest>=5.3", "pytest-cov",]},
+    extras_require={
+        "test": [
+            "pytest>=5.3",
+            "pytest-cov",
+        ]
+    },
     license="MIT",
     long_description=readme(),
     long_description_content_type="text/markdown",
