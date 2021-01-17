@@ -141,11 +141,15 @@ def test_exception_blacklist_supports_inheritance(error_func):
 
 @pytest.mark.parametrize(
     "error_val, expected_state",
-    [(False, CircuitBreakerState.OPEN), (True, CircuitBreakerState.CLOSED),],
+    [
+        (False, CircuitBreakerState.OPEN),
+        (True, CircuitBreakerState.CLOSED),
+    ],
 )
 def test_can_detect_errors_that_are_not_exceptions(error_val, expected_state):
     breaker = CircuitBreaker(
-        detect_error=lambda ret_val: ret_val is False, error_threshold=1,
+        detect_error=lambda ret_val: ret_val is False,
+        error_threshold=1,
     )
 
     def return_code_error():
@@ -172,7 +176,9 @@ def test_notifies_on_breaker_open(error_func, io_error):
 def test_notifies_on_breaker_close(error_func, success_func):
     mock_close = mock.Mock()
     breaker = CircuitBreaker(
-        error_threshold=1, on_close=mock_close, recovery_timeout=1,
+        error_threshold=1,
+        on_close=mock_close,
+        recovery_timeout=1,
     )
 
     assert mock_close.call_count == 0
