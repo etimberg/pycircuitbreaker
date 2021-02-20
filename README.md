@@ -16,7 +16,7 @@ pip install pycircuitbreaker
 
 ## Usage
 
-The simplest usage of `pycircuitbreaker` is to wrap decorate a function that can fail using `circuit`.
+The simplest usage of `pycircuitbreaker` is to decorate a function that can fail using `circuit`.
 
 ```python
 from pycircuitbreaker import circuit
@@ -28,7 +28,7 @@ def function_that_can_fail():
 
 ### Reset Strategies
 
-By default, pycircuitbreaker operates such that a single success resets the error state of a closed breaker. This makes sense for a service that rarely fails, but in certains cases this can pose a problem. If the `error_threshold` is set to `5`, but only 4/5 external requests fail, the breaker will never open. To get around this, the [strategy setting])(#strategy) may be used. By setting this to `pycircuitbreaker.CircuitBreakerStrategy.NET_ERROR`, the net error count (errors - successes) will be used to trigger the breaker.
+By default, pycircuitbreaker operates such that a single success resets the error state of a closed breaker. This makes sense for a service that rarely fails, but in certains cases this can pose a problem. If the `error_threshold` is set to `5`, but only 4/5 external requests fail, the breaker will never open. To get around this, the [strategy setting](#strategy) may be used. By setting this to `pycircuitbreaker.CircuitBreakerStrategy.NET_ERROR`, the net error count (errors - successes) will be used to trigger the breaker.
 
 ## Configuration
 
