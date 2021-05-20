@@ -103,7 +103,8 @@ def test_exception_whitelist(error_func):
     breaker = CircuitBreaker(
         error_threshold=1, exception_whitelist=[IOError], recovery_timeout=1
     )
-    breaker.call(error_func)
+    with pytest.raises(IOError):
+        breaker.call(error_func)
 
     assert breaker.state == CircuitBreakerState.CLOSED
 
@@ -112,7 +113,8 @@ def test_exception_whitelist_supports_inheritance(error_func):
     breaker = CircuitBreaker(
         error_threshold=1, exception_whitelist=[Exception], recovery_timeout=1
     )
-    breaker.call(error_func)
+    with pytest.raises(IOError):
+        breaker.call(error_func)
 
     assert breaker.state == CircuitBreakerState.CLOSED
 
@@ -122,7 +124,8 @@ def test_exception_blacklist_filters_errors(error_func):
     breaker = CircuitBreaker(
         error_threshold=1, exception_blacklist=[ValueError], recovery_timeout=1
     )
-    breaker.call(error_func)
+    with pytest.raises(IOError):
+        breaker.call(error_func)
 
     assert breaker.state == CircuitBreakerState.CLOSED
 
