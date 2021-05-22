@@ -60,11 +60,11 @@ class CircuitBreaker:
         result = None
 
         try:
-            result = func(*args, *kwargs)
+            result = func(*args, **kwargs)
         except Exception as ex:
             if not self._exception_whitelisted(ex) and self._exception_blacklisted(ex):
                 self._handle_error(ex)
-                raise
+            raise
 
         if self._detect_error is not None and self._detect_error(result):
             self._handle_error(result)
