@@ -26,6 +26,103 @@ def function_that_can_fail():
     ...
 ```
 
+For readiness probes (PaaS, k8s, ...) it is common to expose the different circuit breakers state.
+```python
+from pycircuitbreaker import circuit, CircuitBreakerRegistry
+
+
+registry = CircuitBreakerRegistry()
+
+
+@app.route("/ready")
+def ready():
+    content = {
+        "circuits": {
+            cb.id: cb.state.name for cb in registry.get_circuits()
+        }
+    }
+    status = (
+        200 if len(list(registry.get_open_circuits())) == 0 else 500
+    )
+    return content, status, {"Cache-Control": "no-cache"}
+```
+
+Note that the registry is not automatically managed by the library, it is the application responsibility to register created circuit breakers.
+
+It is also possible to reuse the same circuit breaker for different functions that rely on the same external dependency.
+```python
+def db_breaker(func: Callable) -> Callable:
+    breaker = CircuitBreaker(
+        breaker_id="db",
+        error_threshold=5,
+        recovery_timeout=30,
+        recovery_threshold=1,
+        exception_blacklist=[DisconnectionError, TimeoutError],
+    )
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return breaker.call(func, *args, **kwargs)
+
+    return circuit_wrapper
+
+@db_breaker
+def call_to_db():
+    ...
+
+@db_breaker
+def another_call_to_db():
+    ...
+```
+
+### Complete usage example
+```python
+from pycircuitbreaker import CircuitBreakerRegistry, CircuitBreaker
+
+
+registry = CircuitBreakerRegistry()
+
+
+@app.route("/ready")
+def ready():
+    content = {
+        "circuits": {
+            cb.id: cb.state.name for cb in registry.get_circuits()
+        }
+    }
+    status = (
+        200 if len(list(registry.get_open_circuits())) == 0 else 500
+    )
+    return content, status, {"Cache-Control": "no-cache"}
+
+
+def db_breaker(func: Callable) -> Callable:
+    breaker = CircuitBreaker(
+        breaker_id="db",
+        error_threshold=5,
+        recovery_timeout=30,
+        recovery_threshold=1,
+        exception_blacklist=[DisconnectionError, TimeoutError],
+    )
+    registry.register(breaker)
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return breaker.call(func, *args, **kwargs)
+
+    return circuit_wrapper
+
+
+@db_breaker
+def call_to_db():
+    ...
+
+
+@db_breaker
+def another_call_to_db():
+    ...
+```
+
 ### Reset Strategies
 
 By default, pycircuitbreaker operates such that a single success resets the error state of a closed breaker. This makes sense for a service that rarely fails, but in certains cases this can pose a problem. If the `error_threshold` is set to `5`, but only 4/5 external requests fail, the breaker will never open. To get around this, the [strategy setting](#strategy) may be used. By setting this to `pycircuitbreaker.CircuitBreakerStrategy.NET_ERROR`, the net error count (errors - successes) will be used to trigger the breaker.

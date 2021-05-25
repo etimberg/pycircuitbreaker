@@ -15,3 +15,7 @@ class CircuitBreakerException(Exception):
             f"until {self._breaker.recovery_start_time.isoformat()} "
             f"({self._breaker.error_count} errors, {seconds_remaining} sec remaining)"
         )
+
+
+class CircuitBreakerRegistryException(Exception):
+    pass

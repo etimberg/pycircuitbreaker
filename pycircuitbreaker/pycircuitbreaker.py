@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
-from typing import Callable, Iterable, Optional
+from typing import Callable, Iterable, Optional, List
 from uuid import uuid4
 
-from .exceptions import CircuitBreakerException
+from .exceptions import CircuitBreakerException, CircuitBreakerRegistryException
 from .state import CircuitBreakerState
 from .strategies import CircuitBreakerStrategy, get_strategy
 
@@ -160,13 +160,32 @@ class CircuitBreaker:
         return self._strategy.success_count
 
 
+class CircuitBreakerRegistry:
+    def __init__(self) -> None:
+        self._registry: List[CircuitBreaker] = []
+
+    def register(self, circuitbreaker: CircuitBreaker) -> None:
+        found = [
+            circuit for circuit in self._registry if circuit.id == circuitbreaker.id
+        ]
+        if len(found) > 0:
+            raise CircuitBreakerRegistryException()
+        self._registry.append(circuitbreaker)
+
+    def get_open_circuits(self) -> List[CircuitBreaker]:
+        return [cb for cb in self._registry if cb.state == CircuitBreakerState.OPEN]
+
+    def get_circuits(self) -> List[CircuitBreaker]:
+        return self._registry.copy()
+
+
 def circuit(func: Callable, **kwargs) -> Callable:
     """
     Decorates the supplied function with the circuit breaker pattern.
     """
     if not callable(func):
         raise ValueError(
-            f"Circuit breakers can only wrap somthing that is callable. Attempted to wrap {func}"
+            f"Circuit breakers can only wrap something that is callable. Attempted to wrap {func}"
         )
 
     breaker = CircuitBreaker(**kwargs)
