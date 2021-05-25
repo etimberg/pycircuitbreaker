@@ -162,21 +162,20 @@ class CircuitBreaker:
 
 class CircuitBreakerRegistry:
     def __init__(self) -> None:
-        self._registry: List[CircuitBreaker] = []
+        self._registry: Dict[Any, CircuitBreaker] = {}
 
-    def register(self, circuitbreaker: CircuitBreaker) -> None:
-        found = [
-            circuit for circuit in self._registry if circuit.id == circuitbreaker.id
-        ]
-        if len(found) > 0:
+    def register(self, circuit: CircuitBreaker) -> None:
+        if circuit.id in self._registry:
             raise CircuitBreakerRegistryException()
-        self._registry.append(circuitbreaker)
+        self._registry[circuit.id] = circuit
 
     def get_open_circuits(self) -> List[CircuitBreaker]:
-        return [cb for cb in self._registry if cb.state == CircuitBreakerState.OPEN]
+        return [
+            cb for cb in self._registry.values() if cb.state == CircuitBreakerState.OPEN
+        ]
 
     def get_circuits(self) -> List[CircuitBreaker]:
-        return self._registry.copy()
+        return list(self._registry.values())
 
 
 def circuit(func: Callable, **kwargs) -> Callable:
