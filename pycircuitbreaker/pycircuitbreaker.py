@@ -78,10 +78,7 @@ class CircuitBreaker:
         Determine if an exception type is denylisted by checking to see
         if it matches any type in the denylist
         """
-        if (
-            not self._exception_denylist
-            or type(exception) in self._exception_denylist
-        ):
+        if not self._exception_denylist or type(exception) in self._exception_denylist:
             return True
 
         return exception_in_list(exception, self._exception_denylist)
