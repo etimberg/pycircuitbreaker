@@ -28,8 +28,8 @@ class CircuitBreaker:
         breaker_id: Optional = None,
         detect_error: Optional[Callable] = None,
         error_threshold: int = ERROR_THRESHOLD,
-        exception_blacklist: Optional[Iterable[Exception]] = None,
-        exception_whitelist: Optional[Iterable[Exception]] = None,
+        exception_denylist: Optional[Iterable[Exception]] = None,
+        exception_allowlist: Optional[Iterable[Exception]] = None,
         on_close: Optional[Callable] = None,
         on_open: Optional[Callable] = None,
         recovery_threshold: int = RECOVERY_THRESHOLD,
@@ -38,8 +38,8 @@ class CircuitBreaker:
     ):
         self._id = breaker_id or uuid4()
         self._detect_error = detect_error
-        self._exception_blacklist = frozenset(exception_blacklist or [])
-        self._exception_whitelist = frozenset(exception_whitelist or [])
+        self._exception_denylist = frozenset(exception_denylist or [])
+        self._exception_allowlist = frozenset(exception_allowlist or [])
         self._on_close = on_close
         self._on_open = on_open
         self._recovery_timeout = recovery_timeout
@@ -62,7 +62,7 @@ class CircuitBreaker:
         try:
             result = func(*args, **kwargs)
         except Exception as ex:
-            if not self._exception_whitelisted(ex) and self._exception_blacklisted(ex):
+            if not self._exception_allowlisted(ex) and self._exception_denylisted(ex):
                 self._handle_error(ex)
             raise
 
@@ -73,28 +73,28 @@ class CircuitBreaker:
 
         return result
 
-    def _exception_blacklisted(self, exception):
+    def _exception_denylisted(self, exception):
         """
-        Determine if an exception type is blacklisted by checking to see
-        if it matches any type in the blacklist
+        Determine if an exception type is denylisted by checking to see
+        if it matches any type in the denylist
         """
         if (
-            not self._exception_blacklist
-            or type(exception) in self._exception_blacklist
+            not self._exception_denylist
+            or type(exception) in self._exception_denylist
         ):
             return True
 
-        return exception_in_list(exception, self._exception_blacklist)
+        return exception_in_list(exception, self._exception_denylist)
 
-    def _exception_whitelisted(self, exception):
+    def _exception_allowlisted(self, exception):
         """
-        Determine if an exception type is whitelisted by checking to see
-        if it matches any type in the whitelist
+        Determine if an exception type is allowlisted by checking to see
+        if it matches any type in the allowlist
         """
-        if type(exception) in self._exception_whitelist:
+        if type(exception) in self._exception_allowlist:
             return True
 
-        return exception_in_list(exception, self._exception_whitelist)
+        return exception_in_list(exception, self._exception_allowlist)
 
     def _handle_error(self, error):
         opened = self._strategy.handle_error()
