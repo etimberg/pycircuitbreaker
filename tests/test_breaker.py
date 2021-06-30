@@ -99,9 +99,9 @@ def test_error_during_recovery_period_resets_recovery_count(
     assert half_open_breaker.success_count == 0
 
 
-def test_exception_whitelist(error_func):
+def test_exception_allowlist(error_func):
     breaker = CircuitBreaker(
-        error_threshold=1, exception_whitelist=[IOError], recovery_timeout=1
+        error_threshold=1, exception_allowlist=[IOError], recovery_timeout=1
     )
     with pytest.raises(IOError):
         breaker.call(error_func)
@@ -109,9 +109,9 @@ def test_exception_whitelist(error_func):
     assert breaker.state == CircuitBreakerState.CLOSED
 
 
-def test_exception_whitelist_supports_inheritance(error_func):
+def test_exception_allowlist_supports_inheritance(error_func):
     breaker = CircuitBreaker(
-        error_threshold=1, exception_whitelist=[Exception], recovery_timeout=1
+        error_threshold=1, exception_allowlist=[Exception], recovery_timeout=1
     )
     with pytest.raises(IOError):
         breaker.call(error_func)
@@ -119,10 +119,10 @@ def test_exception_whitelist_supports_inheritance(error_func):
     assert breaker.state == CircuitBreakerState.CLOSED
 
 
-def test_exception_blacklist_filters_errors(error_func):
-    # When the blacklist is specified, only those errors are caught
+def test_exception_denylist_filters_errors(error_func):
+    # When the denylist is specified, only those errors are caught
     breaker = CircuitBreaker(
-        error_threshold=1, exception_blacklist=[ValueError], recovery_timeout=1
+        error_threshold=1, exception_denylist=[ValueError], recovery_timeout=1
     )
     with pytest.raises(IOError):
         breaker.call(error_func)
@@ -130,10 +130,10 @@ def test_exception_blacklist_filters_errors(error_func):
     assert breaker.state == CircuitBreakerState.CLOSED
 
 
-def test_exception_blacklist_supports_inheritance(error_func):
-    # When the blacklist is specified, only those errors are caught
+def test_exception_denylist_supports_inheritance(error_func):
+    # When the denylist is specified, only those errors are caught
     breaker = CircuitBreaker(
-        error_threshold=1, exception_blacklist=[Exception], recovery_timeout=1
+        error_threshold=1, exception_denylist=[Exception], recovery_timeout=1
     )
 
     with pytest.raises(IOError):

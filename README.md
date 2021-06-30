@@ -57,7 +57,7 @@ def db_breaker(func: Callable) -> Callable:
         error_threshold=5,
         recovery_timeout=30,
         recovery_threshold=1,
-        exception_blacklist=[DisconnectionError, TimeoutError],
+        exception_denylist=[DisconnectionError, TimeoutError],
     )
 
     @wraps(func)
@@ -102,7 +102,7 @@ def db_breaker(func: Callable) -> Callable:
         error_threshold=5,
         recovery_timeout=30,
         recovery_threshold=1,
-        exception_blacklist=[DisconnectionError, TimeoutError],
+        exception_denylist=[DisconnectionError, TimeoutError],
     )
     registry.register(breaker)
 
@@ -160,38 +160,38 @@ Default: `5`
 
 The number of sequential errors that must occur before the breaker opens. If 4 errors occur a single success will reset the error count to 0.
 
-### exception_blacklist
+### exception_denylist
 
 Type: `Optional[Iterable[Exception]]`
 
 There are cases where only certain errors should count as errors that can open the breaker. In the example below, we are using [requests](https://requests.readthedocs.io/en/master/) to call to an external service and then raise an exception on an error case. We only want the circuit breaker to open on timeouts to
 the external service. 
 
-Note that if this option is used, errors derived from those specified will also be included in the blacklist.
+Note that if this option is used, errors derived from those specified will also be included in the denylist.
 
 ```python
 import requests
 from pycircuitbreaker import circuit
 
-@circuit(exception_blacklist=[requests.exceptions.Timeout])
+@circuit(exception_denylist=[requests.exceptions.Timeout])
 def external_call():
     response = requests.get("EXTERNAL_SERVICE")
     response.raise_for_status()
 ```
 
-### exception_whitelist
+### exception_allowlist
 
 Type: `Optional[Iterable[Exception]]`
 
-This setting allows certain exceptions to not be counted as errors. Taking the same example as the exception_blacklist setting, we can ignore `request.exceptions.HTTPError` only using the whitelist.
+This setting allows certain exceptions to not be counted as errors. Taking the same example as the exception_denylist setting, we can ignore `request.exceptions.HTTPError` only using the allowlist.
 
-Note that if this option is used, errors derived from those specified will also be included in the whitelist.
+Note that if this option is used, errors derived from those specified will also be included in the allowlist.
 
 ```python
 import requests
 from pycircuitbreaker import circuit
 
-@circuit(exception_whitelist=[requests.exceptions.HTTPError])
+@circuit(exception_allowlist=[requests.exceptions.HTTPError])
 def external_call():
     response = requests.get("EXTERNAL_SERVICE")
     response.raise_for_status()
