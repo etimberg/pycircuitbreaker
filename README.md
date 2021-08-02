@@ -1,6 +1,7 @@
 # PyCircuitBreaker
 
 [![PyPI Version](https://img.shields.io/pypi/v/pycircuitbreaker)](https://pypi.org/project/pycircuitbreaker/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pycircuitbreaker/)](https://pypi.org/project/pycircuitbreaker/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/pycircuitbreaker)](https://pypi.org/project/pycircuitbreaker/)
 [![MIT License](https://img.shields.io/pypi/l/pycircuitbreaker)](https://github.com/etimberg/pycircuitbreaker/blob/master/LICENSE)
 ![CI Status](https://img.shields.io/github/workflow/status/etimberg/pycircuitbreaker/CI)
